@@ -166,40 +166,69 @@ def s():
             print('Root:',i,j)
             DFS(i,j,"")
 
-#initial search
-def DFStt(PosX,PosY,string):
-    position = ""
-    print("NorthEast: ", end="")
-    #search(PosX, PosY, string, 'NorthEast', position)
-    state.append(PosX, PosY, string, 'NorthEast', position)
-    print()
-    print("East: ",end="")
-    #search(PosX,PosY,string,'East', position)
-    print()
-    print("SouthEast: ", end="")
-    #search(PosX,PosY,string,'SouthEast', position)
-    print()
-    print("South: ", end="")
-    #search(PosX,PosY,string,'South', position)
-    print()
+class IDFS()
+    def __init__(self):
+        self.run = True #initial with running state
+        self.rootx = 0 #just for keeping root
+        self.rooty = 0
+        self.x = 0  #for keeping recent search
+        self.y = 0
+        self.string = ''
+        self.dir = 0 #0-3 for directory
+        self.directory = ['NorthEast','East','SouthEast','South']
+        self.path = []  #in case of highlighting word
+        self.tmp_round = 0
+        self.last_round = 0
     
-#recursion
-def searchtt(PosX,PosY,string,dir,position):
-    if(PosX >= 0 and PosX <= 4):
-        if (PosY >= 0 and PosY <= 4):
-            #print(table[PosX][PosY], end=" ")
-            string = string + table[PosX][PosY]
-            print(string)
-            redraw(PosX,PosY)
-            if string in words:
-                print("------------------------------------------------------")
-            if (dir == 'NorthEast'):
-                search(PosX-1, PosY+1, string, dir, position)
-            if (dir == 'East'):
-                search(PosX, PosY+1, string, dir, position)
-            if (dir == 'South'):
-                search(PosX+1, PosY, string, dir, position)
-            if (dir == 'SouthEast'):
-                search(PosX + 1, PosY+1, string, dir, position)
+    def nextRoot(self):
+        if(self.rooty < 9):
+            self.rooty += 1
+        elif(self.rootx < 9):
+            self.rooty = 0
+            self.rootx += 1
+        else:
+            self.run = False
+        self.redraw()
 
+    def IDDFSSearch(self):
+        if(self.tmp_round <= self.last_round):
+            if(self.x >= 0 and self.x <= 9):
+                if (self.y >= 0 and self.y <= 9):
+                    
+                    self.string = self.string + table[self.x][self.y]    #Stack
+                    print(self.string)
+                    time.sleep(0.5)
+                    
+                    if self.string in words:                     #หาว่า string(stack)ที่ได้จากการ Search ตรงกับคำที่อยู่ใน list หรือไม่
+                        global position
+                        if self.string not in position:          #ใช้ในการเลือก Save ประโยคที่่ไม่ซ้ำกับประโยคที่มีอยู่แล้ว
+                            if(self.dir == 'NorthEast'):
+                                position = position + self.string + " at " + str(self.x+len(self.string)-1) + ',' + str(self.y-len(self.string)+1) + ' direction: NorthEast' +'\n'
+                            if(self.dir == 'East'):
+                                position = position + self.string + " at " + str(self.x) + ',' + str(self.y - len(self.string) + 1) + ' direction: East' +'\n'
+                            if(self.dir == 'South'):
+                                position = position + self.string + " at " + str(self.x - len(self.string)+1) + ',' + str(self.y) + ' direction: South' +'\n'
+                            if (self.dir == 'SouthEast'):
+                                position = position + self.string + " at " + str(self.x - len(self.string) + 1) + ',' + str(self.y - len(self.string) + 1) + ' direction: SouthEast' +'\n'
+                    if(self.dir == 'NorthEast'):
+                        IDDFSSearch(self.x -1, self.y +1, self.string, self.dir, self.tmp_round+1,self.last_round)
+                    if (self.dir == 'East'):
+                        IDDFSSearch(self.x, self.y+1, self.string, self.dir, self.tmp_round+1, self.last_round)
+                    if (self.dir == 'South'):
+                        IDDFSSearch(self.x+1, self.y, self.string, self.dir, self.tmp_round+1, self.last_round)
+                    if (self.dir == 'SouthEast'):
+                        IDDFSSearch(self.x + 1, self.y+1, self.string, self.dir, self.tmp_round+1, self.last_round)
+    
+    
+    def circle(self):
+        pygame.draw.circle(SCREEN, (0,0,255), (self.rooty*blockSize+blockSize//4+2,self.rootx*blockSize+blockSize//4+5), blockSize//4,2)
+        pygame.draw.circle(SCREEN, (0,255,0), (self.y*blockSize+blockSize//4+2,self.x*blockSize+blockSize//4+5), blockSize//4,2)
+  
+    def redraw(self):
+        SCREEN.fill(BLACK)
+        drawGrid()
+        self.circle()
+
+        pygame.display.update()
+            
 main()
